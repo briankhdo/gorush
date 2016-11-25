@@ -412,7 +412,7 @@ func GetAndroidNotification(req PushNotification) gcm.HttpMessage {
 		}
 	}
 
-	LogAccess.Debug(fmt.Sprintf(notification))
+	// LogAccess.Debug(fmt.Sprintf(notification))
 
 	// notification.Notification = &req.Notification
 
