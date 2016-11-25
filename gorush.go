@@ -7,8 +7,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/appleboy/gorush/config"
-	"github.com/appleboy/gorush/gorush"
+	"wifichua.co/wifichua/gorush/config"
+	"wifichua.co/wifichua/gorush/gorush"
 )
 
 func checkInput(token, message string) {
