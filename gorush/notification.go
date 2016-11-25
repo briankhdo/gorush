@@ -454,6 +454,8 @@ Retry:
 	var isError = false
 	notification := GetAndroidNotification(req)
 
+	fmt.Println(notification)
+
 	if APIKey = PushConf.Android.APIKey; req.APIKey != "" {
 		APIKey = req.APIKey
 	}
