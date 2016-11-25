@@ -391,20 +391,20 @@ func GetAndroidNotification(req PushNotification) gcm.HttpMessage {
 		}
 	}
 
-	notification.Notification = &req.Notification
+	// notification.Notification = &req.Notification
 
 	// Set request message if body is empty
-	if len(notification.Notification.Body) == 0 {
-		notification.Notification.Body = req.Message
-	}
+	// if len(notification.Notification.Body) == 0 {
+	// 	notification.Notification.Body = req.Message
+	// }
 
-	if len(req.Title) > 0 {
-		notification.Notification.Title = req.Title
-	}
+	// if len(req.Title) > 0 {
+	// 	notification.Notification.Title = req.Title
+	// }
 
-	if len(req.Sound) > 0 {
-		notification.Notification.Sound = req.Sound
-	}
+	// if len(req.Sound) > 0 {
+	// 	notification.Notification.Sound = req.Sound
+	// }
 
 	return notification
 }
