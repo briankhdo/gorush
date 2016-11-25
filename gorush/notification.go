@@ -412,6 +412,8 @@ func GetAndroidNotification(req PushNotification) gcm.HttpMessage {
 		}
 	}
 
+	LogAccess.Debug(fmt.Sprintf(notification))
+
 	// notification.Notification = &req.Notification
 
 	// Set request message if body is empty
@@ -454,7 +456,7 @@ Retry:
 	var isError = false
 	notification := GetAndroidNotification(req)
 
-	fmt.Println(notification)
+	LogAccess.Debug(fmt.Sprintf(notification))
 
 	if APIKey = PushConf.Android.APIKey; req.APIKey != "" {
 		APIKey = req.APIKey
