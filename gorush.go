@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/briankhdo/gorush/config"
+	"github.com/appleboy/gorush/config"
 	"github.com/briankhdo/gorush/gorush"
 )
 
