@@ -1,9 +1,10 @@
 package config
 
 import (
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"runtime"
+
+	"gopkg.in/yaml.v2"
 )
 
 // ConfYaml is config structure.
@@ -16,7 +17,7 @@ type ConfYaml struct {
 	Stat    SectionStat    `yaml:"stat"`
 }
 
-// SectionCore is sub seciont of config.
+// SectionCore is sub section of config.
 type SectionCore struct {
 	Port            string     `yaml:"port"`
 	MaxNotification int64      `yaml:"max_notification"`
@@ -30,7 +31,7 @@ type SectionCore struct {
 	PID             SectionPID `yaml:"pid"`
 }
 
-// SectionAPI is sub seciont of config.
+// SectionAPI is sub section of config.
 type SectionAPI struct {
 	PushURI    string `yaml:"push_uri"`
 	StatGoURI  string `yaml:"stat_go_uri"`
@@ -39,21 +40,23 @@ type SectionAPI struct {
 	SysStatURI string `yaml:"sys_stat_uri"`
 }
 
-// SectionAndroid is sub seciont of config.
+// SectionAndroid is sub section of config.
 type SectionAndroid struct {
-	Enabled bool   `yaml:"enabled"`
-	APIKey  string `yaml:"apikey"`
+	Enabled  bool   `yaml:"enabled"`
+	APIKey   string `yaml:"apikey"`
+	MaxRetry int    `yaml:"max_retry"`
 }
 
-// SectionIos is sub seciont of config.
+// SectionIos is sub section of config.
 type SectionIos struct {
 	Enabled    bool   `yaml:"enabled"`
 	KeyPath    string `yaml:"key_path"`
 	Password   string `yaml:"password"`
 	Production bool   `yaml:"production"`
+	MaxRetry   int    `yaml:"max_retry"`
 }
 
-// SectionLog is sub seciont of config.
+// SectionLog is sub section of config.
 type SectionLog struct {
 	Format      string `yaml:"format"`
 	AccessLog   string `yaml:"access_log"`
@@ -63,7 +66,7 @@ type SectionLog struct {
 	HideToken   bool   `yaml:"hide_token"`
 }
 
-// SectionStat is sub seciont of config.
+// SectionStat is sub section of config.
 type SectionStat struct {
 	Engine  string         `yaml:"engine"`
 	Redis   SectionRedis   `yaml:"redis"`
@@ -72,30 +75,30 @@ type SectionStat struct {
 	LevelDB SectionLevelDB `yaml:"leveldb"`
 }
 
-// SectionRedis is sub seciont of config.
+// SectionRedis is sub section of config.
 type SectionRedis struct {
 	Addr     string `yaml:"addr"`
 	Password string `yaml:"password"`
 	DB       int    `yaml:"db"`
 }
 
-// SectionBoltDB is sub seciont of config.
+// SectionBoltDB is sub section of config.
 type SectionBoltDB struct {
 	Path   string `yaml:"path"`
 	Bucket string `yaml:"bucket"`
 }
 
-// SectionBuntDB is sub seciont of config.
+// SectionBuntDB is sub section of config.
 type SectionBuntDB struct {
 	Path string `yaml:"path"`
 }
 
-// SectionLevelDB is sub seciont of config.
+// SectionLevelDB is sub section of config.
 type SectionLevelDB struct {
 	Path string `yaml:"path"`
 }
 
-// SectionPID is sub seciont of config.
+// SectionPID is sub section of config.
 type SectionPID struct {
 	Enabled  bool   `yaml:"enabled"`
 	Path     string `yaml:"path"`
@@ -130,12 +133,14 @@ func BuildDefaultPushConf() ConfYaml {
 	// Android
 	conf.Android.Enabled = false
 	conf.Android.APIKey = ""
+	conf.Android.MaxRetry = 0
 
 	// iOS
 	conf.Ios.Enabled = false
 	conf.Ios.KeyPath = "key.pem"
 	conf.Ios.Password = ""
 	conf.Ios.Production = false
+	conf.Ios.MaxRetry = 0
 
 	// log
 	conf.Log.Format = "string"

@@ -3,11 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/appleboy/gorush/config"
-	"github.com/appleboy/gorush/gorush"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/appleboy/gorush/config"
+	"github.com/appleboy/gorush/gorush"
 )
 
 func checkInput(token, message string) {
@@ -24,6 +25,13 @@ func checkInput(token, message string) {
 var Version = "No Version Provided"
 
 var usageStr = `
+  ________                              .__
+ /  _____/   ____ _______  __ __  ______|  |__
+/   \  ___  /  _ \\_  __ \|  |  \/  ___/|  |  \
+\    \_\  \(  <_> )|  | \/|  |  /\___ \ |   Y  \
+ \______  / \____/ |__|   |____//____  >|___|  /
+        \/                           \/      \/
+
 Usage: gorush [options]
 
 Server Options:

@@ -49,6 +49,7 @@ A push notification micro server using [Gin](https://github.com/gin-gonic/gin) f
 * Support `p12` or `pem` formtat of iOS certificate file.
 * Support `/sys/stats` show response time, status code count, etc.
 * Support for HTTP proxy to Google server (GCM).
+* Support retry send notification if server response is fail.
 
 See the [YAML config example](config/config.yml):
 
@@ -78,12 +79,14 @@ api:
 android:
   enabled: true
   apikey: "YOUR_API_KEY"
+  max_retry: 0 # resend fail notification, default value zero is disabled
 
 ios:
   enabled: false
   key_path: "key.pem"
   password: "" # certificate password, default as empty string.
   production: false
+  max_retry: 0 # resend fail notification, default value zero is disabled
 
 log:
   format: "string" # string or json
@@ -125,18 +128,25 @@ $ go get -u github.com/appleboy/gorush
 On linux
 
 ```
-$ wget -qO- https://github.com/appleboy/gorush/releases/download/v1.6.2/gorush-v1.6.2-linux-amd64.tar.gz | tar xvz
+$ wget -qO- https://github.com/appleboy/gorush/releases/download/v1.6.4/gorush-v1.6.4-linux-amd64.tar.gz | tar xvz
 ```
 
 On OS X
 
 ```
-$ wget -qO- https://github.com/appleboy/gorush/releases/download/v1.6.2/gorush-v1.6.2-darwin-amd64.tar.gz | tar xvz
+$ wget -qO- https://github.com/appleboy/gorush/releases/download/v1.6.4/gorush-v1.6.4-darwin-amd64.tar.gz | tar xvz
 ```
 
 ### Command Usage
 
 ```
+  ________                              .__
+ /  _____/   ____ _______  __ __  ______|  |__
+/   \  ___  /  _ \\_  __ \|  |  \/  ___/|  |  \
+\    \_\  \(  <_> )|  | \/|  |  /\___ \ |   Y  \
+ \______  / \____/ |__|   |____//____  >|___|  /
+        \/                           \/      \/
+
 Usage: gorush [options]
 
 Server Options:
@@ -260,6 +270,7 @@ Show success or failure counts information of notification.
 
 ```json
 {
+  "version": "v1.6.2",
   "queue_max": 8192,
   "queue_usage": 0,
   "total_count": 77,
@@ -359,57 +370,58 @@ See more example about [iOS](#ios-example) or [Android](#android-example).
 
 Request body must has a notifications array. The following is a parameter table for each notification.
 
-|name|type|description|required|note|
-|-------|-------|--------|--------|---------|
-|tokens|string array|device tokens|o||
-|platform|int|platform(iOS,Android)|o|1=iOS, 2=Android|
-|message|string|message for notification|o||
-|title|string|notification title|-||
-|priority|string|Sets the priority of the message.|-|`normal` or `high`|
-|content_available|bool|data messages wake the app by default.|-||
-|sound|string|sound type|-||
-|data|string array|extensible partition|-||
-|api_key|string|Android api key|-|only Android|
-|to|string|The value must be a registration token, notification key, or topic.|-|only Android|
-|collapse_key|string|a key for collapsing notifications|-|only Android|
-|delay_while_idle|bool|a flag for device idling|-|only Android|
-|time_to_live|uint|expiration of message kept on GCM storage|-|only Android|
-|restricted_package_name|string|the package name of the application|-|only Android|
-|dry_run|bool|allows developers to test a request without actually sending a message|-|only Android|
-|notification|string array|payload of a GCM message|-|only Android. See the [detail](#android-notification-payload)|
-|expiration|int|expiration for notification|-|only iOS|
-|apns_id|string|A canonical UUID that identifies the notification|-|only iOS|
-|topic|string|topic of the remote notification|-|only iOS|
-|badge|int|badge count|-|only iOS|
-|category|string|the UIMutableUserNotificationCategory object|-|only iOS|
-|alert|string array|payload of a iOS message|-|only iOS. See the [detail](#ios-alert-payload)|
+| name                    | type         | description                                                                                       | required | note                                                          |
+|-------------------------|--------------|---------------------------------------------------------------------------------------------------|----------|---------------------------------------------------------------|
+| tokens                  | string array | device tokens                                                                                     | o        |                                                               |
+| platform                | int          | platform(iOS,Android)                                                                             | o        | 1=iOS, 2=Android                                              |
+| message                 | string       | message for notification                                                                          | o        |                                                               |
+| title                   | string       | notification title                                                                                | -        |                                                               |
+| priority                | string       | Sets the priority of the message.                                                                 | -        | `normal` or `high`                                            |
+| content_available       | bool         | data messages wake the app by default.                                                            | -        |                                                               |
+| sound                   | string       | sound type                                                                                        | -        |                                                               |
+| data                    | string array | extensible partition                                                                              | -        |                                                               |
+| retry                   | int          | retry send notification if fail response from server. Value must be small than `max_retry` field. | -        |                                                               |
+| api_key                 | string       | Android api key                                                                                   | -        | only Android                                                  |
+| to                      | string       | The value must be a registration token, notification key, or topic.                               | -        | only Android                                                  |
+| collapse_key            | string       | a key for collapsing notifications                                                                | -        | only Android                                                  |
+| delay_while_idle        | bool         | a flag for device idling                                                                          | -        | only Android                                                  |
+| time_to_live            | uint         | expiration of message kept on GCM storage                                                         | -        | only Android                                                  |
+| restricted_package_name | string       | the package name of the application                                                               | -        | only Android                                                  |
+| dry_run                 | bool         | allows developers to test a request without actually sending a message                            | -        | only Android                                                  |
+| notification            | string array | payload of a GCM message                                                                          | -        | only Android. See the [detail](#android-notification-payload) |
+| expiration              | int          | expiration for notification                                                                       | -        | only iOS                                                      |
+| apns_id                 | string       | A canonical UUID that identifies the notification                                                 | -        | only iOS                                                      |
+| topic                   | string       | topic of the remote notification                                                                  | -        | only iOS                                                      |
+| badge                   | int          | badge count                                                                                       | -        | only iOS                                                      |
+| category                | string       | the UIMutableUserNotificationCategory object                                                      | -        | only iOS                                                      |
+| alert                   | string array | payload of a iOS message                                                                          | -        | only iOS. See the [detail](#ios-alert-payload)                |
 
 ### iOS alert payload
 
-|name|type|description|required|note|
-|-------|-------|--------|--------|---------|
-|action|string|The label of the action button. This one is required for Safari Push Notifications.|-||
-|action-loc-key|string|If a string is specified, the system displays an alert that includes the Close and View buttons.|-||
-|launch-image|string|The filename of an image file in the app bundle, with or without the filename extension.|-||
-|loc-args|array of strings|Variable string values to appear in place of the format specifiers in loc-key.|-||
-|loc-key|string|A key to an alert-message string in a Localizable.strings file for the current localization.|-||
-|title-loc-args|array of strings|Variable string values to appear in place of the format specifiers in title-loc-key.|-||
-|title-loc-key|string|The key to a title string in the Localizable.strings file for the current localization.|-||
+| name           | type             | description                                                                                      | required | note |
+|----------------|------------------|--------------------------------------------------------------------------------------------------|----------|------|
+| action         | string           | The label of the action button. This one is required for Safari Push Notifications.              | -        |      |
+| action-loc-key | string           | If a string is specified, the system displays an alert that includes the Close and View buttons. | -        |      |
+| launch-image   | string           | The filename of an image file in the app bundle, with or without the filename extension.         | -        |      |
+| loc-args       | array of strings | Variable string values to appear in place of the format specifiers in loc-key.                   | -        |      |
+| loc-key        | string           | A key to an alert-message string in a Localizable.strings file for the current localization.     | -        |      |
+| title-loc-args | array of strings | Variable string values to appear in place of the format specifiers in title-loc-key.             | -        |      |
+| title-loc-key  | string           | The key to a title string in the Localizable.strings file for the current localization.          | -        |      |
 
 See more detail about [APNs Remote Notification Payload](https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/TheNotificationPayload.html#//apple_ref/doc/uid/TP40008194-CH107-SW1).
 
 ### Android notification payload
 
-|name|type|description|required|note|
-|-------|-------|--------|--------|---------|
-|icon|string|Indicates notification icon.|-||
-|tag|string|Indicates whether each notification message results in a new entry on the notification center on Android.|-||
-|color|string|Indicates color of the icon, expressed in #rrggbb format|-||
-|click_action|string|The action associated with a user click on the notification.|-||
-|body_loc_key|string|Indicates the key to the body string for localization.|-||
-|body_loc_args|string|Indicates the string value to replace format specifiers in body string for localization.|-||
-|title_loc_key|string|Indicates the key to the title string for localization.|-||
-|title_loc_args|string|Indicates the string value to replace format specifiers in title string for localization.|-||
+| name           | type   | description                                                                                               | required | note |
+|----------------|--------|-----------------------------------------------------------------------------------------------------------|----------|------|
+| icon           | string | Indicates notification icon.                                                                              | -        |      |
+| tag            | string | Indicates whether each notification message results in a new entry on the notification center on Android. | -        |      |
+| color          | string | Indicates color of the icon, expressed in #rrggbb format                                                  | -        |      |
+| click_action   | string | The action associated with a user click on the notification.                                              | -        |      |
+| body_loc_key   | string | Indicates the key to the body string for localization.                                                    | -        |      |
+| body_loc_args  | string | Indicates the string value to replace format specifiers in body string for localization.                  | -        |      |
+| title_loc_key  | string | Indicates the key to the title string for localization.                                                   | -        |      |
+| title_loc_args | string | Indicates the string value to replace format specifiers in title string for localization.                 | -        |      |
 
 See more detail about [GCM server reference](https://developers.google.com/cloud-messaging/http-server-ref#send-downstream).
 
@@ -514,11 +526,11 @@ Add other fields which user defined via `data` field.
 
 Error response message table:
 
-|status code|message|
-|-------|-------|
-|400|Missing `notifications` field.|
-|400|Notifications field is empty.|
-|400|Number of notifications(50) over limit(10)|
+| status code | message                                    |
+|-------------|--------------------------------------------|
+| 400         | Missing `notifications` field.             |
+| 400         | Notifications field is empty.              |
+| 400         | Number of notifications(50) over limit(10) |
 
 Success response:
 
@@ -535,6 +547,13 @@ Set up `gorush` in the cloud in under 5 minutes with zero knowledge of Golang or
 ```bash
 $ docker pull appleboy/gorush
 $ docker run --name gorush -p 80:8088 appleboy/gorush
+```
+
+Run `gorush` with your own config file.
+
+```bash
+$ docker pull appleboy/gorush
+$ docker run --name gorush -v ${PWD}/config.yml:/config.yml -p 80:8088 appleboy/gorush
 ```
 
 Testing your gorush server using [httpie](https://github.com/jkbrzt/httpie) command.

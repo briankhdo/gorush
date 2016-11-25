@@ -5,7 +5,9 @@ BUILD_IMAGE := "gorush-build"
 # docker hub project name.
 PRODUCTION_IMAGE := "gorush"
 DEPLOY_ACCOUNT := "appleboy"
-VERSION := $(shell git describe --tags || git rev-parse --short HEAD)
+ifeq ($(VERSION),)
+	VERSION := $(shell git describe --tags --always || git rev-parse --short HEAD)
+endif
 TARGETS_NOVENDOR := $(shell glide novendor)
 export PROJECT_PATH = /go/src/github.com/appleboy/gorush
 
@@ -35,7 +37,7 @@ update:
 	glide update
 
 build_static:
-	go build -ldflags="${EXTLDFLAGS}-s -w -X main.Version=${VERSION}" -o bin/gorush gorush.go
+	go build -ldflags='${EXTLDFLAGS}-s -w -X main.Version=${VERSION}' -o bin/gorush gorush.go
 
 build: clean
 	sh script/build.sh $(VERSION)
@@ -64,16 +66,16 @@ config_test: init
 html:
 	go tool cover -html=.cover/coverage.txt
 
-docker_build: clean
+docker_build:
 	tar -zcvf build.tar.gz gorush.go gorush config storage Makefile glide.lock glide.yaml
 	sed -e "s/#VERSION#/$(VERSION)/g" docker/Dockerfile.build > docker/Dockerfile.tmp
-	docker build --rm -t $(BUILD_IMAGE) -f docker/Dockerfile.tmp .
+	docker build -t $(BUILD_IMAGE) -f docker/Dockerfile.tmp .
 	docker run --rm $(BUILD_IMAGE) > gorush.tar.gz
 
 docker_production:
-	docker build --rm -t $(PRODUCTION_IMAGE) -f docker/Dockerfile.dist .
+	docker build -t $(PRODUCTION_IMAGE) -f docker/Dockerfile.dist .
 
-deploy: docker_build docker_production
+docker_deploy:
 ifeq ($(tag),)
 	@echo "Usage: make $@ tag=<tag>"
 	@exit 1
@@ -95,3 +97,6 @@ clean:
 		gorush/gorush.db \
 		storage/boltdb/gorush.db \
 		.cover
+
+version:
+	@echo $(VERSION)

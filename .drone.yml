@@ -20,6 +20,35 @@ pipeline:
     to: u359650f919427b5229330c7205c47ee4
     when:
       status: [ success, failure ]
+      matrix:
+        GO_VERSION: 1.7.3
+
+  gtalk:
+    image: appleboy/drone-gtalk
+    pull: true
+    to: appleboy.tw@gmail.com
+    when:
+      status: [ success, failure ]
+      matrix:
+        GO_VERSION: 1.7.3
+
+  facebook:
+    image: appleboy/drone-facebook
+    pull: true
+    to: 1234973386524610
+    when:
+      status: [ success, failure ]
+      matrix:
+        GO_VERSION: 1.7.3
+
+  telegram:
+    image: appleboy/drone-telegram
+    pull: true
+    to: 65382999
+    when:
+      status: [ success, failure ]
+      matrix:
+        GO_VERSION: 1.7.3
 
   # rebuild the cache on the sftp server
   rebuild_cache:
@@ -29,6 +58,8 @@ pipeline:
     ignore_branch: true
     when:
       branch: master
+      matrix:
+        GO_VERSION: 1.7.3
 
 services:
   redis:
@@ -39,5 +70,5 @@ workspace:
 
 matrix:
   GO_VERSION:
-    - 1.7.1
+    - 1.7.3
     - 1.6.3
