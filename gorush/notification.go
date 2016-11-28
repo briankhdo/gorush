@@ -285,7 +285,7 @@ func iosAlertDictionary(payload *payload.Payload, req PushNotification) *payload
 func GetIOSNotification(req PushNotification) *apns.Notification {
 	notification := &apns.Notification{
 		ApnsID: req.ApnsID,
-		// Topic:  req.Topic,
+		Topic:  req.Topic,
 	}
 
 	if req.Expiration > 0 {
